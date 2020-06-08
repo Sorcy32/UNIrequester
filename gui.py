@@ -2,8 +2,7 @@ from tkinter import *
 from tkinter import filedialog as fd
 from tkinter import messagebox as mb
 import config
-
-# import requester
+import requester
 
 # Получаем данные из настроек программы
 link = config.get_setting('Network', 'link')
@@ -35,16 +34,6 @@ def get_count_threads():
     return eThreads.get()
 
 
-def get_list():
-    """
-    Функция получения списка необходимых параметров ответа в Json
-    """
-    item = []
-    for i in itemList:
-        item.append(str(i.content.get()))
-    return item
-
-
 def start():
     """Проверка и передача параметров"""
     packet = {'radio': var_list.get(),
@@ -54,34 +43,30 @@ def start():
               'path': filePath,
               'accessKey': eLinkTwo.get(),
               'splitter': eSaveRows.get()}
-
     check = len(packet)
     for x in packet:
         if packet[x] == "" or packet[x] is None or len(itemList) == 0:
             check -= 1
             mb.showerror(title="Ошибка", message="Не все данные заполнены")
             break
-
     if len(packet) == check:
         print('Запускаю запросы')
-        # requester.importer(packet)
+        requester.importer(packet)
 
 
 def add_item():
     itemList.append(Item())
-    # print(len(itemList))
 
 
 def del_item():
     try:
         current = itemList.pop()
         Item.delete_item(current)
-        # print(len(itemList))
     except:
         pass
 
 
-def test():
+def get_list():
     """
     Собирает значения текстовых полей, которые указал пользователь,
     по которым будет поиск в Json от Naumen
@@ -95,16 +80,22 @@ def test():
         for r in row.texts:
             tmp.append(r.get())
         to_send_list.append(tmp)
-    print(to_send_list)
     return to_send_list
 
 
 class Item:
-
     def __init__(self):
         self.texts = []
         self.item_group = LabelFrame(answer_group, text=('Item ' + str(len(itemList) + 1)))
-        self.item_group.grid(row=len(itemList) + 1, column=0)
+        # TODO Проверку условий ниже исправить
+        if (len(itemList) + 1) <= 15:
+            self.item_group.grid(row=len(itemList) + 1, column=0)
+        elif 15 < len(itemList) + 1 <= 30:
+            self.item_group.grid(row=(int(len(itemList) + 1) - 15), column=1)
+        elif 30 < len(itemList) + 1 <= 45:
+            self.item_group.grid(row=(int(len(itemList) + 1) - 30), column=2)
+        else:
+            mb.showerror(title="Ошибка", message="Не больше 45")
         self.content = Entry(self.item_group, width=20)
         self.texts.append(self.content)
         self.content.grid(row=0, column=1)
@@ -115,18 +106,13 @@ class Item:
 
     def delete_item(self):
         self.item_group.destroy()
+        print(len(itemList))
 
     def add_Entry(self):
         self.entry = Entry(self.item_group, width=15)
         self.entry.grid(row=0, column=len(self.texts) + 1)
         self.texts.append(self.entry)
         self.bAddEntry.grid(row=0, column=len(self.texts) + 2)
-
-
-
-
-
-
 
 
 # Сборка интерфейса
@@ -152,7 +138,7 @@ eSaveRows = Entry(ssSav, text='30000', width=10)  # Количество стр�
 eSaveRows.insert(0, "30000")
 eSaveRows.grid(row=1, column=1, padx=10)  #
 ssSav.grid(row=1, column=1, padx=10)
-bStart = Button(settings_group, text='START', command=test, width=20).grid(row=1, column=3)  # Кнопка СТАРТ
+bStart = Button(settings_group, text='START', command=start, width=20).grid(row=1, column=3)  # Кнопка СТАРТ
 settings_group.grid(row=1, column=0, columnspan=3, pady=5, padx=5, sticky=W + E)
 # Группа интерфейса для отображения примера ссылки для запроса
 link_group = LabelFrame(root, text="Адрес запроса будет вида:")
@@ -172,7 +158,7 @@ controls = LabelFrame(answer_group)
 controls.grid(row=0)
 buttonAddSingle = Button(controls, text="+ Строка", command=add_item, width=7).grid(row=0, column=0)
 buttonAddMultiply = Button(controls, text="- Строка", command=del_item, width=7).grid(row=0, column=1,
-                                                                                 sticky=W + E)
+                                                                                      sticky=W + E)
 buttonRadioDelete = Radiobutton(controls, text='Without List', variable=var_list, value=0)
 buttonRadioDelete.grid(row=0, column=2)
 answer_group.grid(row=3, column=0, columnspan=3, pady=5, padx=5, sticky=W + E)
