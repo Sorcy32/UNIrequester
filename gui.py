@@ -161,6 +161,8 @@ buttonAddMultiply = Button(controls, text="- Строка", command=del_item, wi
                                                                                       sticky=W + E)
 buttonRadioDelete = Radiobutton(controls, text='Without List', variable=var_list, value=0)
 buttonRadioDelete.grid(row=0, column=2)
+info = Label(answer_group)
+info.grid(row=0, column=2)
 answer_group.grid(row=3, column=0, columnspan=3, pady=5, padx=5, sticky=W + E)
 #  Конец сборки интерфейса
 root.mainloop()  # Запуск отображения
