@@ -4,6 +4,9 @@ from tkinter import messagebox as mb
 import config
 import requester
 
+# TODO Сделать возможность импорта и сохранения userItems
+
+
 # Получаем данные из настроек программы
 link = config.get_setting('Network', 'link')
 key = config.get_setting('Network', 'accesskey')
@@ -16,14 +19,19 @@ def open_file():
     """
      Ф-я открытия файла исходных данных
     """
-    filename = fd.askopenfilename(filetypes=[('Текстовые файлы', '*.txt')])
-    global filePath
-    filePath = filename
-    ePath.insert(0, filename)  # Вставит путь к файлу в текстовое поле
-    with open(filename, 'r') as file:  # Это нужно для ввода в центр
-        x = file.readline()  # ссылки примера (первой строки)
-    eLinkMiddle.delete(0, END)  # из файла того как будет
-    eLinkMiddle.insert(0, x)  # отображаться типовая ссылка
+    try:
+        ePath.delete(0, END)
+        filename = fd.askopenfilename(filetypes=[('Текстовые файлы', '*.txt')])
+        global filePath
+        filePath = filename
+        ePath.insert(0, filename)  # Вставит путь к файлу в текстовое поле
+        with open(filename, 'r') as file:  # Это нужно для ввода в центр
+            x = file.readline()  # ссылки примера (первой строки)
+        eLinkMiddle.delete(0, END)  # из файла того как будет
+        eLinkMiddle.insert(0, x)  # отображаться типовая ссылка
+    except FileNotFoundError:
+        pass
+
 
 
 # Получить количество потоков, введенное пользователем
@@ -106,13 +114,36 @@ class Item:
 
     def delete_item(self):
         self.item_group.destroy()
-        print(len(itemList))
 
     def add_Entry(self):
         self.entry = Entry(self.item_group, width=15)
         self.entry.grid(row=0, column=len(self.texts) + 1)
         self.texts.append(self.entry)
         self.bAddEntry.grid(row=0, column=len(self.texts) + 2)
+
+
+def open_pre_set():
+    while range(len(itemList)):
+        del_item()
+    try:
+        presetFile = fd.askopenfilename(filetypes=[('Текстовые файлы', '*.cfg')])
+        with open(presetFile, 'r') as file:
+            file = file.read().splitlines()
+            count = 0
+            for usr_item in file:
+                add_item()
+                usr_item = usr_item.split(',')
+                if len(usr_item) == 1:
+                    itemList[count].content.insert(0, usr_item)
+                elif len(usr_item) == 2:
+                    itemList[count].content.insert(0, usr_item[0])
+                    itemList[count].add_Entry()
+                    itemList[count].entry.insert(0, usr_item[1])
+                else:
+                    mb.showwarning('Warning', 'Something Wrong with opened file')
+                count += 1
+    except FileNotFoundError:
+        pass
 
 
 # Сборка интерфейса
@@ -140,6 +171,7 @@ eSaveRows.grid(row=1, column=1, padx=10)  #
 ssSav.grid(row=1, column=1, padx=10)
 bStart = Button(settings_group, text='START', command=start, width=20).grid(row=1, column=3)  # Кнопка СТАРТ
 settings_group.grid(row=1, column=0, columnspan=3, pady=5, padx=5, sticky=W + E)
+bOpenPreSet = Button(settings_group, text='PreSet', command=open_pre_set, width=20).grid(row=1, column=4)
 # Группа интерфейса для отображения примера ссылки для запроса
 link_group = LabelFrame(root, text="Адрес запроса будет вида:")
 eLinkOne = Entry(link_group, width=60, justify=RIGHT)  # Первая половина ссылки

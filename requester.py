@@ -7,8 +7,6 @@ from queue import Queue
 import save_to_xlsx as stx
 
 
-# TODO Сделать импорт списка параметров
-# TODO Сделать открытие ссылок и сохранение json в базу
 
 login = config.get_setting('Account', 'login')
 password = config.get_setting('Account', 'password')
@@ -30,19 +28,27 @@ def single_resp(resp, ans):
             return ''
         else:
             return i
-
-    if len(ans) == 1:
-        x = resp[ans[0]]
-        return checker(x)
-    elif len(ans) == 2:
-        try:
-            x = resp[ans[0]][ans[1]]
-            return str(checker(x))
-        except:
-            z = []
-            for x in resp[ans[0]]:
-                z.append(x[ans[1]])
-            return str(checker(z))
+    try:
+        if len(ans) == 1:
+            x = resp[ans[0]]
+            return checker(x)
+        elif len(ans) == 2:
+            try:
+                x = resp[ans[0]][ans[1]]
+                return str(checker(x))
+            except TypeError:
+                return str(resp[ans[0]])
+            except:
+                z = []
+                for x in resp[ans[0]]:
+                    print(type(x[ans[1]]))
+                    z.append(x[ans[1]])
+                return str(checker(z))
+    except KeyError:
+        print('Не верно указан итем запроса')
+        return 'Не верно указан итем запроса'
+    except:
+        return 'Ошибка обработки запроса'
 
 
 def multi_resp(resp, ans, li):
