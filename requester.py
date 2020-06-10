@@ -6,8 +6,6 @@ from threading import Thread, current_thread
 from queue import Queue
 import save_to_xlsx as stx
 
-
-
 login = config.get_setting('Account', 'login')
 password = config.get_setting('Account', 'password')
 link = config.get_setting("Network", "link")
@@ -36,19 +34,20 @@ def single_resp(resp, ans):
             try:
                 x = resp[ans[0]][ans[1]]
                 return str(checker(x))
-            except TypeError:
-                return str(resp[ans[0]])
             except:
-                z = []
-                for x in resp[ans[0]]:
-                    print(type(x[ans[1]]))
-                    z.append(x[ans[1]])
-                return str(checker(z))
+                try:
+                    z = []
+                    for x in resp[ans[0]]:
+                        z.append(x[ans[1]])
+                    return str(checker(z))
+                except TypeError:
+                    if type(resp[ans[0]]) == type(None):
+                        return 'None'
+                    else:
+                        return 'Проверить на сайте, сообщить об этой ошибке программы'
     except KeyError:
         print('Не верно указан итем запроса')
         return 'Не верно указан итем запроса'
-    except:
-        return 'Ошибка обработки запроса'
 
 
 def multi_resp(resp, ans, li):
@@ -60,7 +59,6 @@ def multi_resp(resp, ans, li):
         else:
             print('NULL in ', li)
             finishedlist.append(['NULL in '])
-
 
 
 def get_request(link_to_open, login=login, password=password, locationN="XxXxX"):
@@ -79,21 +77,15 @@ def get_request(link_to_open, login=login, password=password, locationN="XxXxX")
         elif radio == 1:
             for item in user_items:
                 multi_resp(resp, item, link_to_open)
-        #print(finishedlist)
+        # print(finishedlist)
 
-
-        #finishedlist.append(line)
+        # finishedlist.append(line)
 
         # print(line)
         # except:
         #   print('Ошибка пир обработке Json по параметрам')
     else:
         print('Ошибка sc != 200')
-
-
-
-
-
 
 
 def run(queue, result_queue):
@@ -106,19 +98,20 @@ def run(queue, result_queue):
     result_queue.queue.clear()
     queue.queue.clear()
 
+
 def silent_saver():
     coun = 0
     dest = 100
     while True:
         if len(finishedlist) != 0:
             stx.add_header(finishedlist.pop())
-            coun +=1
+            coun += 1
             if coun == dest:
                 print('Перехвачено и сохранено: ', coun)
                 dest += 100
                 print(len(finishedlist))
 
-        #for x in finishedlist:
+        # for x in finishedlist:
         #    stx.add_header(x)
 
 
@@ -141,14 +134,19 @@ def get():
         # para = (link, login, Password, id)
         thread.daemon = True
         thread.start()
-    #thread2 = Thread(target=silent_saver)
-    #thread2.daemon = True
-    #thread2.start()
+    # thread2 = Thread(target=silent_saver)
+    # thread2.daemon = True
+    # thread2.start()
     queue.join()
+    # Запись заголовков в файл
+    header = []
+    for xz in user_items:
+        header.append(xz)
+    stx.add_header(header)
+    # Сохранение информации
     for im in finishedlist:
         stx.add_header(im)
     print('program exit')
-
 
 
 # TODO Сделать сохранение
@@ -166,16 +164,9 @@ def importer(packet):
     theard_count = packet['threads']
     file = packet['path']
     radio = packet['radio']
-    header = []
-    for xz in user_items:
-        header.append(xz)
-    stx.add_header(header)
     with open(file, 'r') as f:
         # items_to_open = []
         for z in f:
             z = z.strip()
             items_to_open.append(z)
     get()
-
-
-
