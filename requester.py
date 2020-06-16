@@ -26,6 +26,7 @@ def single_resp(resp, ans):
             return ''
         else:
             return i
+
     try:
         if len(ans) == 1:
             x = resp[ans[0]]
@@ -51,11 +52,16 @@ def single_resp(resp, ans):
 
 
 def multi_resp(resp, ans, li):
+    '''
+    Обработка ответа, который сохраняем построчно с одной колонкой
+    :param resp: ответ на запрос (json)
+    :param ans: что достаём из ответа
+    :param li: ссылка, по которой получали ответ
+    :return:
+    '''
     for xx in resp[ans[0]]:
         if xx[ans[1]] is not None:
-            finishedlist.append([xx[ans[1]]])
-
-
+            finishedlist.append(([xx[ans[1]]], li))
         else:
             print('NULL in ', li)
             finishedlist.append(['NULL in '])
@@ -63,7 +69,6 @@ def multi_resp(resp, ans, li):
 
 def get_request(link_to_open, login=login, password=password, locationN="XxXxX"):
     r = requests.get(link_to_open, cert=ssssert, auth=(login, password), timeout=None)
-    # print(radio)
     print('Открываю ссылку: ', link_to_open)
     if r.status_code == 200:
         j = json.dumps(r.json())
@@ -110,7 +115,6 @@ def silent_saver():
                 print('Перехвачено и сохранено: ', coun)
                 dest += 100
                 print(len(finishedlist))
-
         # for x in finishedlist:
         #    stx.add_header(x)
 
@@ -125,7 +129,6 @@ def get():
 
     for id in items_to_open:
         full_link = str(str(link) + str(id) + str(access_key))
-        # print('full_link', full_link)
         queue.put(full_link.strip())
 
     for i in range(int(theard_count)):
@@ -149,14 +152,12 @@ def get():
     print('program exit')
 
 
-# TODO Сделать сохранение
-print((''))
+print('')
 
 
 def importer(packet):
     items_to_open.clear()
     finishedlist.clear()
-    # print('importer started')
     global link, access_key, user_items, theard_count, radio
     link = packet['link']
     access_key = packet['accessKey']
@@ -165,7 +166,6 @@ def importer(packet):
     file = packet['path']
     radio = packet['radio']
     with open(file, 'r') as f:
-        # items_to_open = []
         for z in f:
             z = z.strip()
             items_to_open.append(z)
