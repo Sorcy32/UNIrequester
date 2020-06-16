@@ -4,7 +4,7 @@ from tkinter import messagebox as mb
 import config
 import requester
 
-# TODO Сделать возможность импорта и сохранения userItems
+# TODO Сделать возможность сохранения userItems
 
 
 # Получаем данные из настроек программы
@@ -14,7 +14,6 @@ itemList = []
 filePath = None
 
 
-# Обработчик открытия файла
 def open_file():
     """
      Ф-я открытия файла исходных данных
@@ -33,8 +32,6 @@ def open_file():
         pass
 
 
-
-# Получить количество потоков, введенное пользователем
 def get_count_threads():
     """
     Функция для получения количества потоков, которое указал пользователь
@@ -125,9 +122,11 @@ class Item:
 def open_pre_set():
     while range(len(itemList)):
         del_item()
+    var_list.set(0)
+
     try:
-        presetFile = fd.askopenfilename(filetypes=[('Текстовые файлы', '*.cfg')])
-        with open(presetFile, 'r') as file:
+        preset_file = fd.askopenfilename(filetypes=[('Файлы конфигурации *.cfg', '*.cfg')])
+        with open(preset_file, 'r') as file:
             file = file.read().splitlines()
             count = 0
             for usr_item in file:
