@@ -59,12 +59,19 @@ def multi_resp(resp, ans, li):
     :param li: ссылка, по которой получали ответ
     :return:
     '''
-    for xx in resp[ans[0]]:
-        if xx[ans[1]] is not None:
-            finishedlist.append(([xx[ans[1]]], li))
-        else:
-            print('NULL in ', li)
-            finishedlist.append(['NULL in '])
+    if len(ans) == 2:
+        for xx in resp[ans[0]]:
+            if xx[ans[1]] is not None:
+                finishedlist.append(([xx[ans[1]]], li))
+            else:
+                print('NULL in ', li)
+                finishedlist.append(str(['NULL in '], li))
+    elif len(ans) == 1:
+        for xx in resp[ans[0]]:
+            if xx is not None:
+                finishedlist.append(str(xx))
+            else:
+                finishedlist.append(str(['NULL in '], li))
 
 
 def get_request(link_to_open, login=login, password=password, locationN="XxXxX"):
@@ -91,6 +98,7 @@ def get_request(link_to_open, login=login, password=password, locationN="XxXxX")
         #   print('Ошибка пир обработке Json по параметрам')
     else:
         print('Ошибка sc != 200')
+        finishedlist.append(str('Ошибка сервера при обработке ссылки', link_to_open))
 
 
 def run(queue, result_queue):
@@ -147,8 +155,10 @@ def get():
         header.append(xz)
     stx.add_header(header)
     # Сохранение информации
-    for im in finishedlist:
-        stx.add_header(im)
+    print('Сохраняю данные')
+    while finishedlist:
+        stx.add_header(finishedlist.pop())
+    stx.save()
     print('program exit')
 
 

@@ -8,11 +8,11 @@ filename = (str(datetime.strftime(datetime.now(), "%d.%m.%y %H.%M.%S")) + '.xlsx
 
 def add_header(items):
     data = []
-    #data = items
+    # data = items
     for x in items:
         data.append(str(x))
     ws.append(data)
+
+
+def save():
     wb.save(filename)
-
-
-
