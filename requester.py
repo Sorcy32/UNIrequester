@@ -18,6 +18,7 @@ theard_count = 1
 ssssert = ''
 radio = 0
 finishedlist = []
+splitter = 10
 
 
 def single_resp(resp, ans):
@@ -156,8 +157,18 @@ def get():
     stx.add_header(header)
     # Сохранение информации
     print('Сохраняю данные')
+    save_count = 0
+    save_total = len(finishedlist)
+    save_round = 0
     while finishedlist:
-        stx.add_header(finishedlist.pop())
+        save_round += 1
+        print('Cохраняю {0} строку из {1}.'.format(save_round, save_total))
+        if save_count <= int(splitter):
+            stx.add_header(finishedlist.pop())
+            save_count += 1
+        else:
+            stx.save()
+            save_count = 0
     stx.save()
     print('program exit')
 
@@ -168,13 +179,14 @@ print('')
 def importer(packet):
     items_to_open.clear()
     finishedlist.clear()
-    global link, access_key, user_items, theard_count, radio
+    global link, access_key, user_items, theard_count, radio, splitter
     link = packet['link']
     access_key = packet['accessKey']
     user_items = packet['items']
     theard_count = packet['threads']
     file = packet['path']
     radio = packet['radio']
+    splitter = packet['splitter']
     with open(file, 'r') as f:
         for z in f:
             z = z.strip()

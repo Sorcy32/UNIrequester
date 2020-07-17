@@ -12,7 +12,9 @@ def add_header(items):
     for x in items:
         data.append(str(x))
     ws.append(data)
+    print(ws.max_row)
 
 
 def save():
     wb.save(filename)
+
